@@ -33,12 +33,11 @@ var data = DataToZero();
 //     data.push(d3.range(numberOfDataPoint).map(function (i) {
 //         return {x: i, y: randomData()};
 //     }));
-console.log(data);
 
 var chart = lineChart()
-        .x(d3.scale.linear().domain([0, 24]))
-        // .x(d3.time.scale().domain([new Date(2014,7,31), new Date(2014,8,1)]))
-        .y(d3.scale.linear().domain([0, 1]));
+        // .x(d3.scale.linear().domain([0, 24]))
+        .x(d3.time.scale().domain([new Date(2014,6,31), new Date(2014,7,1)]))
+        .y(d3.scale.linear().domain([0, 0.1]));
 
 // data.forEach(function (series) {
     chart.addSeries(data);
@@ -242,61 +241,129 @@ function pieChart(){
 
 ///line chart
 
-
+/////////////////////date object one////////
 function getRaw(){
-  var dataByTimeRange = [];
-  for (var i=0; i<24; i++){
-    dataByTimeRange.push([])
-  }
-  var am = [];
-  var pm =[];
+    var result = [];
+    var count = 0;
+    rawData.forEach(function(d, i){
+        if (d.Date === '7/31/2014'){
+            if ( d.Activity === '1'){
+                count++;
+            }
+            var format = d3.time.format("%Y-%m-%d-%H-%S");
+            var date = new Date(d.Date+' '+d.Time);
+            var ddd = format(date);
 
-  rawData.forEach(function(d){
-    if (d.Date === '7/31/2014'){
-      if (d.Time.substr(d.Time.length-2,2) === "PM" ){
-        pm.push(d);
-      }else{
-        am.push(d)
-      }
-    }
-  })
-  am.forEach(function(d){
-    if (d.Time.length === 7 ){
-      dataByTimeRange[d.Time[0]].push(d)
-    }else if (d.Time.length === 8){
-      if ( d.Time.substr(0,2) === '12' ){
-        dataByTimeRange[0].push(d);
-      }else{
-        dataByTimeRange[d.Time.substr(0,2)].push(d);
-      }
-    }
-  })
-  pm.forEach(function(d){
-    if (d.Time.length === 7 ){
-      dataByTimeRange[parseFloat(d.Time[0])+12].push(d)
-    }else if (d.Time.length === 8){
-      if ( d.Time.substr(0,2) === '12' ){
-        dataByTimeRange[12].push(d);
-      }else{
-        dataByTimeRange[parseFloat(d.Time.substr(0,2))+12].push(d)
-      }
-    }
-  })
-  var dataPoints = [];
-  dataByTimeRange.forEach(function(timeRange, i){
-    var nbrOfRows = timeRange.length;
-    var activityCount = 0;
-    timeRange.forEach(function(data){
-      if (data.Activity === '1'){
-        activityCount++
-      }
-    })
-    var x = activityCount/nbrOfRows;
-    dataPoints.push({y:x, x:i})
-  })
-  return dataPoints;
+            var percent = count/i;
+            result.push( {x : date, y: percent} );
 
+        }
+    });
+    // console.log('result',result);
+
+    result.sort(function(obj1, obj2) {
+        return obj1.x - obj2.x;
+    });
+    return result;
 }
+  // am.forEach(function(d){
+  //   if (d.Time.length === 7 ){
+  //     dataByTimeRange[d.Time[0]].push(d)
+  //   }else if (d.Time.length === 8){
+  //     if ( d.Time.substr(0,2) === '12' ){
+  //       dataByTimeRange[0].push(d);
+  //     }else{
+  //       dataByTimeRange[d.Time.substr(0,2)].push(d);
+  //     }
+  //   }
+  // })
+  // pm.forEach(function(d){
+  //   if (d.Time.length === 7 ){
+  //     dataByTimeRange[parseFloat(d.Time[0])+12].push(d)
+  //   }else if (d.Time.length === 8){
+  //     if ( d.Time.substr(0,2) === '12' ){
+  //       dataByTimeRange[12].push(d);
+  //     }else{
+  //       dataByTimeRange[parseFloat(d.Time.substr(0,2))+12].push(d)
+  //     }
+  //   }
+  // })
+  // var dataPoints = [];
+  // dataByTimeRange.forEach(function(timeRange, i){
+  //   var nbrOfRows = timeRange.length;
+  //   var activityCount = 0;
+  //   timeRange.forEach(function(data){
+  //     if (data.Activity === '1'){
+  //       activityCount++
+  //     }
+  //   })
+  //   var x = activityCount/nbrOfRows;
+  //   dataPoints.push({y:x, x:i})
+  // })
+  // return dataPoints;
+
+
+
+
+
+
+
+
+///////////////////old one
+
+// function getRaw(){
+//   var dataByTimeRange = [];
+//   for (var i=0; i<24; i++){
+//     dataByTimeRange.push([])
+//   }
+//   var am = [];
+//   var pm =[];
+
+//   rawData.forEach(function(d){
+//     if (d.Date === '7/31/2014'){
+//       if (d.Time.substr(d.Time.length-2,2) === "PM" ){
+//         pm.push(d);
+//       }else{
+//         am.push(d)
+//       }
+//     }
+//   })
+//   am.forEach(function(d){
+//     if (d.Time.length === 7 ){
+//       dataByTimeRange[d.Time[0]].push(d)
+//     }else if (d.Time.length === 8){
+//       if ( d.Time.substr(0,2) === '12' ){
+//         dataByTimeRange[0].push(d);
+//       }else{
+//         dataByTimeRange[d.Time.substr(0,2)].push(d);
+//       }
+//     }
+//   })
+//   pm.forEach(function(d){
+//     if (d.Time.length === 7 ){
+//       dataByTimeRange[parseFloat(d.Time[0])+12].push(d)
+//     }else if (d.Time.length === 8){
+//       if ( d.Time.substr(0,2) === '12' ){
+//         dataByTimeRange[12].push(d);
+//       }else{
+//         dataByTimeRange[parseFloat(d.Time.substr(0,2))+12].push(d)
+//       }
+//     }
+//   })
+//   var dataPoints = [];
+//   dataByTimeRange.forEach(function(timeRange, i){
+//     var nbrOfRows = timeRange.length;
+//     var activityCount = 0;
+//     timeRange.forEach(function(data){
+//       if (data.Activity === '1'){
+//         activityCount++
+//       }
+//     })
+//     var x = activityCount/nbrOfRows;
+//     dataPoints.push({y:x, x:i})
+//   })
+//   return dataPoints;
+// };
 
 
 
