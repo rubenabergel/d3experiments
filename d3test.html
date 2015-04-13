@@ -25,20 +25,41 @@ function DataToZero(){
 var data = DataToZero();
   d3.csv('data.csv', function(d){
     rawData = d;
+    var numberOfSeries = 2,
+    numberOfDataPoint = 11,
+    data = getRaw();
 
-    d.forEach(function(e){
-      data.forEach(function(p){
-        if(p.device === e.Device){
-          p.qte++
-        }
-      })
-    })
+// for (var i = 0; i < numberOfSeries; ++i)
+//     data.push(d3.range(numberOfDataPoint).map(function (i) {
+//         return {x: i, y: randomData()};
+//     }));
+console.log(data);
+
+var chart = lineChart()
+        .x(d3.scale.linear().domain([0, 24]))
+        // .x(d3.time.scale().domain([new Date(2014,7,31), new Date(2014,8,1)]))
+        .y(d3.scale.linear().domain([0, 1]));
+
+// data.forEach(function (series) {
+    chart.addSeries(data);
+// });
+
+chart.render();
+
+    // d.forEach(function(e){
+    //   data.forEach(function(p){
+    //     if(p.device === e.Device){
+    //       p.qte++
+    //     }
+    //   })
+    // })
 
   // chart = pieChart()
   //   .data(data);
   //   chart.render();
 
   });
+
 
 
 function getPastDays(nbr){
@@ -271,9 +292,9 @@ function getRaw(){
       }
     })
     var x = activityCount/nbrOfRows;
-    dataPoints.push({x:x, y:i})
+    dataPoints.push({y:x, x:i})
   })
-  console.log(dataPoints);
+  return dataPoints;
 
 }
 
@@ -322,7 +343,7 @@ function lineChart() { // <-1A
     }
 
     function renderXAxis(axesG){
-        var xAxis = d3.svg.axis()
+               var xAxis = d3.svg.axis()
                 .scale(_x.range([0, quadrantWidth()]))
                 .orient("bottom");
 
@@ -339,7 +360,7 @@ function lineChart() { // <-1A
                 .attr("x1", 0)
                 .attr("y1", 0)
                 .attr("x2", 0)
-                .attr("y2", - quadrantHeight());
+                .attr("y2", quadrantWidth());
     }
 
     function renderYAxis(axesG){
@@ -391,7 +412,6 @@ function lineChart() { // <-1A
     }
 
     function renderLines() {
-      return;
         _line = d3.svg.line() //<-4A
                         .x(function (d) { return _x(d.x); })
                         .y(function (d) { return _y(d.y); });
@@ -412,16 +432,17 @@ function lineChart() { // <-1A
     }
 
     function renderDots() {
-      return;
         _data.forEach(function (list, i) {
+            console.log('list',list, i);
             _bodyG.selectAll("circle._" + i) //<-4E
                         .data(list)
                     .enter()
                     .append("circle")
                     .attr("class", "dot _" + i);
 
+            list.forEach(function (point,i) {
             _bodyG.selectAll("circle._" + i)
-                    .data(list)
+                    .data(point)
                     .style("stroke", function (d) {
                         return _colors(i); //<-4F
                     })
@@ -429,6 +450,7 @@ function lineChart() { // <-1A
                     .attr("cx", function (d) { return _x(d.x); })
                     .attr("cy", function (d) { return _y(d.y); })
                     .attr("r", 4.5);
+                });
         });
     }
 
@@ -515,24 +537,25 @@ function update() {
     chart.render();
 }
 
-var numberOfSeries = 2,
-    numberOfDataPoint = 11,
-    data = [];
+// var numberOfSeries = 2,
+//     numberOfDataPoint = 11,
+//     data = [];
 
-for (var i = 0; i < numberOfSeries; ++i)
-    data.push(d3.range(numberOfDataPoint).map(function (i) {
-        return {x: i, y: randomData()};
-    }));
+// for (var i = 0; i < numberOfSeries; ++i)
+//     data.push(d3.range(numberOfDataPoint).map(function (i) {
+//         return {x: i, y: randomData()};
+//     }));
 
-var chart = lineChart()
-        .x(d3.scale.linear().domain([0, 10]))
-        .y(d3.scale.linear().domain([0, 10]));
+// var chart = lineChart()
+//         .x(d3.time.scale().domain([new Date(2014,7,31), new Date(2014,8,1)]))
+//         .y(d3.scale.linear().domain([0, 1]));
+// console.log(data);
+// data.forEach(function (series) {
+//     console.log(series)
+//     chart.addSeries(series);
+// });
 
-data.forEach(function (series) {
-    chart.addSeries(series);
-});
-
-chart.render();
+// chart.render();
 
 
 </script>
