@@ -28,13 +28,13 @@ var data = DataToZero();
     data = getRaw(0);
 
 
- chart = lineChart()
+ lineChart = lineChart()
         .x(d3.time.scale().domain([new Date(2014,6,31), new Date(2014,7,1)]))
         .y(d3.scale.linear().domain([0, 1]));
 
-chart.addSeries(data);
+lineChart.addSeries(data);
 
-chart.render();
+lineChart.render();
 
     // d.forEach(function(e){
     //   data.forEach(function(p){
@@ -53,15 +53,20 @@ chart.render();
 
 
 function getPastDays(days){
-    data = getRaw(days);
+    // data = getRaw(days);
     var dateLowerLimit = new Date(2014, 6, 31-days);
+    var today = new Date(2014,7,1);
 
-        chart.x(d3.time.scale().domain([dateLowerLimit , new Date(2014,7,1)]))
-             .y(d3.scale.linear().domain([0, 1]));
+    lineChart.x(d3.time.scale().domain([dateLowerLimit , today]))
 
-    chart.addSeries(data);
+    // _svg.select("x axis")
+    //     .transition()
+    //     .call(xAxis);
 
-    chart.render();
+
+    lineChart.addSeries(data);
+
+    lineChart.render();
     ///////////////
     // console.log(ok);
   // var newData = DataToZero();
@@ -244,9 +249,7 @@ function pieChart(){
 ///line chart
 
 
-function graphPast(){
-    console.log('okoko');
-}
+
 /////////////////////date object one////////
 function getRaw(days){
     var result = [];
@@ -280,107 +283,6 @@ function getRaw(days){
     });
     return result;
 }
-  // am.forEach(function(d){
-  //   if (d.Time.length === 7 ){
-  //     dataByTimeRange[d.Time[0]].push(d)
-  //   }else if (d.Time.length === 8){
-  //     if ( d.Time.substr(0,2) === '12' ){
-  //       dataByTimeRange[0].push(d);
-  //     }else{
-  //       dataByTimeRange[d.Time.substr(0,2)].push(d);
-  //     }
-  //   }
-  // })
-  // pm.forEach(function(d){
-  //   if (d.Time.length === 7 ){
-  //     dataByTimeRange[parseFloat(d.Time[0])+12].push(d)
-  //   }else if (d.Time.length === 8){
-  //     if ( d.Time.substr(0,2) === '12' ){
-  //       dataByTimeRange[12].push(d);
-  //     }else{
-  //       dataByTimeRange[parseFloat(d.Time.substr(0,2))+12].push(d)
-  //     }
-  //   }
-  // })
-  // var dataPoints = [];
-  // dataByTimeRange.forEach(function(timeRange, i){
-  //   var nbrOfRows = timeRange.length;
-  //   var activityCount = 0;
-  //   timeRange.forEach(function(data){
-  //     if (data.Activity === '1'){
-  //       activityCount++
-  //     }
-  //   })
-  //   var x = activityCount/nbrOfRows;
-  //   dataPoints.push({y:x, x:i})
-  // })
-  // return dataPoints;
-
-
-
-
-
-
-
-
-///////////////////old one
-
-// function getRaw(){
-//   var dataByTimeRange = [];
-//   for (var i=0; i<24; i++){
-//     dataByTimeRange.push([])
-//   }
-//   var am = [];
-//   var pm =[];
-
-//   rawData.forEach(function(d){
-//     if (d.Date === '7/31/2014'){
-//       if (d.Time.substr(d.Time.length-2,2) === "PM" ){
-//         pm.push(d);
-//       }else{
-//         am.push(d)
-//       }
-//     }
-//   })
-//   am.forEach(function(d){
-//     if (d.Time.length === 7 ){
-//       dataByTimeRange[d.Time[0]].push(d)
-//     }else if (d.Time.length === 8){
-//       if ( d.Time.substr(0,2) === '12' ){
-//         dataByTimeRange[0].push(d);
-//       }else{
-//         dataByTimeRange[d.Time.substr(0,2)].push(d);
-//       }
-//     }
-//   })
-//   pm.forEach(function(d){
-//     if (d.Time.length === 7 ){
-//       dataByTimeRange[parseFloat(d.Time[0])+12].push(d)
-//     }else if (d.Time.length === 8){
-//       if ( d.Time.substr(0,2) === '12' ){
-//         dataByTimeRange[12].push(d);
-//       }else{
-//         dataByTimeRange[parseFloat(d.Time.substr(0,2))+12].push(d)
-//       }
-//     }
-//   })
-//   var dataPoints = [];
-//   dataByTimeRange.forEach(function(timeRange, i){
-//     var nbrOfRows = timeRange.length;
-//     var activityCount = 0;
-//     timeRange.forEach(function(data){
-//       if (data.Activity === '1'){
-//         activityCount++
-//       }
-//     })
-//     var x = activityCount/nbrOfRows;
-//     dataPoints.push({y:x, x:i})
-//   })
-//   return dataPoints;
-// };
-
-
-
 
 
 
@@ -424,6 +326,7 @@ function lineChart() { // <-1A
     }
 
     function renderXAxis(axesG){
+        console.log(axesG);
                var xAxis = d3.svg.axis()
                 .scale(_x.range([0, quadrantWidth()]))
                 .orient("bottom");
@@ -602,40 +505,6 @@ function lineChart() { // <-1A
     return _chart; // <-1E
 }
 
-function randomData() {
-    return Math.random() * 9;
-}
-
-function update() {
-    for (var i = 0; i < data.length; ++i) {
-        var series = data[i];
-        series.length = 0;
-        for (var j = 0; j < numberOfDataPoint; ++j)
-            series.push({x: j, y: randomData()});
-    }
-
-    chart.render();
-}
-
-// var numberOfSeries = 2,
-//     numberOfDataPoint = 11,
-//     data = [];
-
-// for (var i = 0; i < numberOfSeries; ++i)
-//     data.push(d3.range(numberOfDataPoint).map(function (i) {
-//         return {x: i, y: randomData()};
-//     }));
-
-// var chart = lineChart()
-//         .x(d3.time.scale().domain([new Date(2014,7,31), new Date(2014,8,1)]))
-//         .y(d3.scale.linear().domain([0, 1]));
-// console.log(data);
-// data.forEach(function (series) {
-//     console.log(series)
-//     chart.addSeries(series);
-// });
-
-// chart.render();
 
 
 </script>
