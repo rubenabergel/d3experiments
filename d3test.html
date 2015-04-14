@@ -25,23 +25,14 @@ function DataToZero(){
 var data = DataToZero();
   d3.csv('data.csv', function(d){
     rawData = d;
-    var numberOfSeries = 2,
-    numberOfDataPoint = 11,
-    data = getRaw();
+    data = getRaw(0);
 
-// for (var i = 0; i < numberOfSeries; ++i)
-//     data.push(d3.range(numberOfDataPoint).map(function (i) {
-//         return {x: i, y: randomData()};
-//     }));
 
-var chart = lineChart()
-        // .x(d3.scale.linear().domain([0, 24]))
+ chart = lineChart()
         .x(d3.time.scale().domain([new Date(2014,6,31), new Date(2014,7,1)]))
-        .y(d3.scale.linear().domain([0, 0.1]));
+        .y(d3.scale.linear().domain([0, 1]));
 
-// data.forEach(function (series) {
-    chart.addSeries(data);
-// });
+chart.addSeries(data);
 
 chart.render();
 
@@ -61,30 +52,41 @@ chart.render();
 
 
 
-function getPastDays(nbr){
-  var newData = DataToZero();
-  var pastDaysData = [];
-  var today = new Date(2014, 06, 31);
-  var dateLimit = new Date (2014, 06, 31-nbr)
+function getPastDays(days){
+    data = getRaw(days);
+    var dateLowerLimit = new Date(2014, 6, 31-days);
 
-  rawData.forEach(function(e){
-    var month = e.Date[0] -1,
-        day = e.Date.substr(2,2),
-        year = e.Date.substr(5,4);
+        chart.x(d3.time.scale().domain([dateLowerLimit , new Date(2014,7,1)]))
+             .y(d3.scale.linear().domain([0, 1]));
 
-    var ThisEntryDate = new Date (year, month, day)
-     if ( ThisEntryDate >= dateLimit ){
-        newData.forEach(function(p){
-          if(p.device === e.Device){
-            p.qte++
-          }
-      })
-     }
+    chart.addSeries(data);
 
+    chart.render();
+    ///////////////
+    // console.log(ok);
+  // var newData = DataToZero();
+  // var pastDaysData = [];
+  // var today = new Date(2014, 06, 31);
+  // var dateLimit = new Date (2014, 06, 31-nbr)
 
-  })
-       chart.data(newData);
-      chart.render();
+  // rawData.forEach(function(e){
+  //   var month = e.Date[0] -1,
+  //       day = e.Date.substr(2,2),
+  //       year = e.Date.substr(5,4);
+
+  //   var ThisEntryDate = new Date (year, month, day)
+  //    if ( ThisEntryDate >= dateLimit ){
+  //       newData.forEach(function(p){
+  //         if(p.device === e.Device){
+  //           p.qte++
+  //         }
+  //     })
+  //    }
+////////////////
+
+  // })
+  //      chart.data(newData);
+  //     chart.render();
 }
 
 
@@ -241,20 +243,32 @@ function pieChart(){
 
 ///line chart
 
+
+function graphPast(){
+    console.log('okoko');
+}
 /////////////////////date object one////////
-function getRaw(){
+function getRaw(days){
     var result = [];
     var count = 0;
+    var rows = 0;
+    var today = new Date(2014,7,1);
+    var dateLowerLimit = new Date(2014, 6, 31-days);
     rawData.forEach(function(d, i){
-        if (d.Date === '7/31/2014'){
+
+        // if (d.Date === '7/31/2014'){
+        if (dateLowerLimit < new Date(d.Date+' '+d.Time) && new Date(d.Date+' '+d.Time) < today){
+            rows++;
             if ( d.Activity === '1'){
                 count++;
+
             }
             var format = d3.time.format("%Y-%m-%d-%H-%S");
             var date = new Date(d.Date+' '+d.Time);
             var ddd = format(date);
 
-            var percent = count/i;
+            var percent = count/rows;
+            // console.log(count, rows);
             result.push( {x : date, y: percent} );
 
         }
@@ -500,7 +514,6 @@ function lineChart() { // <-1A
 
     function renderDots() {
         _data.forEach(function (list, i) {
-            console.log('list',list, i);
             _bodyG.selectAll("circle._" + i) //<-4E
                         .data(list)
                     .enter()
