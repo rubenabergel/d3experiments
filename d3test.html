@@ -4,6 +4,7 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <link rel="stylesheet" type="text/css" href="dc.css">
         <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="regression.js"></script>
 
 </head>
 <body>
@@ -12,6 +13,8 @@
   </div>
 
 <script type="text/javascript">
+
+
 function DataToZero(){
     var data = [
           {'device':'tablet', 'qte':0},
@@ -47,8 +50,22 @@ lineChart.render();
   });
 
 
+// var fifi = [[0,1],[32, 67],[12, 79]];
+// var result = regression('linear', fifi);
+// console.log(result);
+
+
+
 
 function getPastDays(days){
+    var meanLineData = getRaw(days-1).map(function(element){
+            return [ element.x.valueOf(), element.y];
+    });
+    var meanLine = regression('linear', meanLineData);
+
+    console.log(meanLine);
+
+
 
     lineChart.setSeries(getRaw(days-1));
     lineChart.update(days);
@@ -500,7 +517,7 @@ function pieChart(){
 <button onclick="getPastDays(3)">3 days</button>
 <button onclick="getPastDays(7)">7 days</button>
 <button onclick="getPastDays(14)">14 days</button>
-<button onclick="getRaw()">getRaw()</button>
+<button onclick="trendLine()">trendLine</button>
 
 
 </body>
