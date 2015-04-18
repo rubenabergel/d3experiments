@@ -14,7 +14,7 @@
 
 <script type="text/javascript">
 
-
+var daysRange;
 function DataToZero(){
     var data = [
           {'device':'tablet', 'qte':0},
@@ -50,14 +50,30 @@ lineChart.render();
   });
 
 
-// var fifi = [[0,1],[32, 67],[12, 79]];
-// var result = regression('linear', fifi);
-// console.log(result);
+function trendLine(days){
+        var movingWindowAvg = function (arr, step) {
+            return arr.map(function (_, idx) {
+                var wnd = arr.slice(idx - step, idx + step + 1);
+                var result = d3.sum(wnd) / wnd.length;
+                result = (result == result) ? result : _;
+
+                return result;
+            });
+        };
 
 
+var temp = getRaw(days-1);
+var t = getRaw(days-1).map(function(d){
+    return d.y;
+});
+var trendLine = movingWindowAvg(t, 7).map(function(d, i){
+    return {y:d, x:temp[i].x};
+})
 
 
-function getPastDays(days){
+}
+
+function meanLine(days){
     var meanLineData = getRaw(days-1).map(function(element){
             return [ element.x.valueOf(), element.y];
     });
@@ -65,7 +81,12 @@ function getPastDays(days){
 
     console.log(meanLine);
 
+}
 
+
+function getPastDays(days){
+
+    daysRange = days;
 
     lineChart.setSeries(getRaw(days-1));
     lineChart.update(days);
@@ -119,7 +140,6 @@ function getRaw(days){
             rows++;
             if ( d.Activity === '1'){
                 count++;
-
             }
             var format = d3.time.format("%Y-%m-%d-%H-%S");
             var date = new Date(d.Date+' '+d.Time);
@@ -250,8 +270,6 @@ function lineChart() { // <-1A
                     .attr("clip-path", "url(#body-clip)");
 
         renderLines();
-
-        // renderDots();
     }
 
     function renderLines() {
@@ -517,7 +535,9 @@ function pieChart(){
 <button onclick="getPastDays(3)">3 days</button>
 <button onclick="getPastDays(7)">7 days</button>
 <button onclick="getPastDays(14)">14 days</button>
-<button onclick="trendLine()">trendLine</button>
+<button onclick="trendLine(daysRange)">trend</button>
+<button onclick="meanLine(daysRange)">mean</button>
+
 
 
 </body>
