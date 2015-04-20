@@ -165,6 +165,12 @@ button {
     stroke-width: 2;
 }
 
+.mean{
+    fill: none;
+    stroke: red;
+    stroke-width: 2;
+}
+
 .dot {
   fill: #fff;
   stroke: steelblue;

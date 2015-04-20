@@ -13,9 +13,15 @@
   </div>
 
 <script type="text/javascript">
+
+
 var trendFlag = false;
+var meanFlag = false;
 var trendL;
+var meanLineToBeDrawn;
 var daysRange = 1;
+
+
 function DataToZero(){
     var data = [
           {'device':'tablet', 'qte':0},
@@ -35,6 +41,8 @@ var pieData = DataToZero();
 lineChart = lineChart()
 lineChart.setSeries(data);
 lineChart.render();
+console.log(data);
+
 
     d.forEach(function(e){
       pieData.forEach(function(p){
@@ -71,27 +79,32 @@ var t = getRaw(days-1).map(function(d){
 trendL = movingWindowAvg(t, 7).map(function(d, i){
     return {y:d, x:temp[i].x};
 })
-lineChart.setSeries(data);
+
 lineChart.render();
 
 }
 
 
-// function meanLine(days){
-//     console.log(days);
-//     var meanLineData = getRaw(days-1).map(function(element){
-//             return [ element.x.valueOf(), element.y];
-//     });
-//     console.log(meanLineData)
-//     var meanLine = regression('linear', meanLineData);
-
-//     console.log(meanLine);
-
-// }
+function meanLine(days){
+    meanFlag = true;
+    meanLineToBeDrawn = [];
+    var meanLineData = getRaw(days-1).map(function(element){
+            return [ element.x.valueOf(), element.y];
+    });
+    var meanLine = regression('linear', meanLineData);
+    meanLineData.forEach(function(element){
+        meanLineToBeDrawn.push({y: meanLine.equation[0]*element[0] + meanLine.equation[1],
+                                x:new Date(element[0])
+                              })
+    })
+    lineChart.render();
+}
 
 
 
 function getPastDays(days){
+    trendFlag = false;
+    meanFlag = false;
 
     daysRange = days;
 
@@ -118,7 +131,6 @@ function getPastDays(days){
      }
 
   })
-    trendLine(days);
     chart.data(newData);
     chart.render();
 }
@@ -306,8 +318,7 @@ function lineChart() { // <-1A
                 .enter()
                 .append("path")
                 .style("stroke", function (d, i) {
-                    console.log(_colors(i),_colors(i+1),_colors(i+3),_colors(i+4));
-                    return _colors(i+5);
+                    return _colors(10);
                 })
                 .attr("class", "trend");
 
@@ -315,6 +326,26 @@ function lineChart() { // <-1A
                 .data([trendL])
                 .transition()
                 .attr("d", function (d) { return _line(d); });
+        }else{
+            d3.select("path.trend").remove();
+        }
+
+        if (meanFlag === true){
+        _bodyG.selectAll("path.mean")
+                    .data([meanLineToBeDrawn])
+                .enter()
+                .append("path")
+                .style("stroke", function (d, i) {
+                    return 'red';
+                })
+                .attr("class", "mean");
+
+        _bodyG.selectAll("path.mean")
+                .data([meanLineToBeDrawn])
+                .transition()
+                .attr("d", function (d) { return _line(d); });
+        }else{
+            d3.select("path.mean").remove();
         }
     }
 
