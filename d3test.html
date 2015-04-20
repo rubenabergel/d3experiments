@@ -13,8 +13,9 @@
   </div>
 
 <script type="text/javascript">
-
-var daysRange;
+var trendFlag = false;
+var trendL;
+var daysRange = 1;
 function DataToZero(){
     var data = [
           {'device':'tablet', 'qte':0},
@@ -51,6 +52,7 @@ lineChart.render();
 
 
 function trendLine(days){
+    trendFlag = true;
         var movingWindowAvg = function (arr, step) {
             return arr.map(function (_, idx) {
                 var wnd = arr.slice(idx - step, idx + step + 1);
@@ -66,22 +68,27 @@ var temp = getRaw(days-1);
 var t = getRaw(days-1).map(function(d){
     return d.y;
 });
-var trendLine = movingWindowAvg(t, 7).map(function(d, i){
+trendL = movingWindowAvg(t, 7).map(function(d, i){
     return {y:d, x:temp[i].x};
 })
-
-
-}
-
-function meanLine(days){
-    var meanLineData = getRaw(days-1).map(function(element){
-            return [ element.x.valueOf(), element.y];
-    });
-    var meanLine = regression('linear', meanLineData);
-
-    console.log(meanLine);
+lineChart.setSeries(data);
+lineChart.render();
 
 }
+
+
+// function meanLine(days){
+//     console.log(days);
+//     var meanLineData = getRaw(days-1).map(function(element){
+//             return [ element.x.valueOf(), element.y];
+//     });
+//     console.log(meanLineData)
+//     var meanLine = regression('linear', meanLineData);
+
+//     console.log(meanLine);
+
+// }
+
 
 
 function getPastDays(days){
@@ -111,6 +118,7 @@ function getPastDays(days){
      }
 
   })
+    trendLine(days);
     chart.data(newData);
     chart.render();
 }
@@ -272,11 +280,12 @@ function lineChart() { // <-1A
         renderLines();
     }
 
+
+
     function renderLines() {
         _line = d3.svg.line()
                         .x(function (d) { return _x(d.x); })
                         .y(function (d) { return _y(d.y); });
-
         _bodyG.selectAll("path.line")
                     .data([_data])
                 .enter()
@@ -290,6 +299,23 @@ function lineChart() { // <-1A
                 .data([_data])
                 .transition()
                 .attr("d", function (d) { return _line(d); });
+
+        if (trendFlag === true){
+        _bodyG.selectAll("path.trend")
+                    .data([trendL])
+                .enter()
+                .append("path")
+                .style("stroke", function (d, i) {
+                    console.log(_colors(i),_colors(i+1),_colors(i+3),_colors(i+4));
+                    return _colors(i+5);
+                })
+                .attr("class", "trend");
+
+        _bodyG.selectAll("path.trend")
+                .data([trendL])
+                .transition()
+                .attr("d", function (d) { return _line(d); });
+        }
     }
 
 
@@ -484,7 +510,7 @@ function pieChart(){
                     .attr("dy", ".35em")
                     .attr("text-anchor", "middle")
                     .text(function (d) {
-                        return d.data.qte;
+                        return d.data.device;
                     });
         }
 

@@ -158,6 +158,13 @@ button {
     stroke-width: 2;
 }
 
+
+.trend{
+    fill: none;
+    stroke: green;
+    stroke-width: 2;
+}
+
 .dot {
   fill: #fff;
   stroke: steelblue;
@@ -170,7 +177,7 @@ button {
 }
 
 .pie text{
-    fill: white;
+    fill: black;
     font-weight: bold;
 }
 
