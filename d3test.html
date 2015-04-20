@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8">
     <script src="http://d3js.org/d3.v3.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="dc.css">
+
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src="regression.js"></script>
 
@@ -15,14 +15,39 @@
 <script type="text/javascript">
 
 
-var trendFlag = false;
-var meanFlag = false;
-var trendL;
-var meanLineToBeDrawn;
-var daysRange = 1;
+var trendFlag = false,
+    meanFlag = false,
+    daysRange = 1,
+    rawData,
+    trendLineToBeDrawn,
+    meanLineToBeDrawn,
+    menCount = 0,
+    womenCount = 0;
 
 
-function DataToZero(){
+
+var pieData = PieDataToZero();
+
+//Load data and init chart at today
+d3.csv('data.csv', function(d){
+    rawData = d;
+    data = getLinechartDataPoints(0);
+
+    lineChart = lineChart()
+    lineChart.setSeries(data);
+    lineChart.render();
+
+    chart = pieChart()
+    .data(PieSortData(1));
+    chart.render();
+
+    updateGenderCount(1)
+
+});
+
+
+
+function PieDataToZero(){
     var data = [
           {'device':'tablet', 'qte':0},
           {'device':'mobile', 'qte':0},
@@ -32,63 +57,37 @@ function DataToZero(){
   return data;
 }
 
-var pieData = DataToZero();
-  d3.csv('data.csv', function(d){
-    rawData = d;
-    data = getRaw(0);
-
-
-lineChart = lineChart()
-lineChart.setSeries(data);
-lineChart.render();
-console.log(data);
-
-
-    d.forEach(function(e){
-      pieData.forEach(function(p){
-        if(p.device === e.Device){
-          p.qte++
-        }
-      })
-    })
-
-  chart = pieChart()
-    .data(pieData);
-    chart.render();
-
-  });
-
-
 function trendLine(days){
     trendFlag = true;
-        var movingWindowAvg = function (arr, step) {
-            return arr.map(function (_, idx) {
-                var wnd = arr.slice(idx - step, idx + step + 1);
-                var result = d3.sum(wnd) / wnd.length;
-                result = (result == result) ? result : _;
 
-                return result;
-            });
-        };
+    var temp = getLinechartDataPoints(days-1);
+    var t = getLinechartDataPoints(days-1).map(function(d){
+        return d.y;
+    });
 
+    trendLineToBeDrawn = movingWindowAvg(t, 7).map(function(d, i){
+        return {y:d, x:temp[i].x};
+    })
 
-var temp = getRaw(days-1);
-var t = getRaw(days-1).map(function(d){
-    return d.y;
-});
-trendL = movingWindowAvg(t, 7).map(function(d, i){
-    return {y:d, x:temp[i].x};
-})
-
-lineChart.render();
+    lineChart.render();
 
 }
+
+var movingWindowAvg = function (arr, step) {
+    return arr.map(function (_, idx) {
+        var wnd = arr.slice(idx - step, idx + step + 1);
+        var result = d3.sum(wnd) / wnd.length;
+        result = (result == result) ? result : _;
+
+        return result;
+    });
+};
 
 
 function meanLine(days){
     meanFlag = true;
     meanLineToBeDrawn = [];
-    var meanLineData = getRaw(days-1).map(function(element){
+    var meanLineData = getLinechartDataPoints(days-1).map(function(element){
             return [ element.x.valueOf(), element.y];
     });
     var meanLine = regression('linear', meanLineData);
@@ -105,13 +104,22 @@ function meanLine(days){
 function getPastDays(days){
     trendFlag = false;
     meanFlag = false;
-
     daysRange = days;
 
-    lineChart.setSeries(getRaw(days-1));
+    updateGenderCount(days)
+//line chart
+    lineChart.setSeries(getLinechartDataPoints(days-1));
     lineChart.update(days);
 
-  var newData = DataToZero();
+//pie chart
+
+    chart.data(PieSortData(days));
+    chart.render();
+}
+
+
+function PieSortData(days){
+  var result = PieDataToZero();
   var pastDaysData = [];
   var today = new Date(2014, 06, 31);
   var dateLimit = new Date (2014, 06, 31-days)
@@ -123,7 +131,7 @@ function getPastDays(days){
 
     var ThisEntryDate = new Date (year, month, day)
      if ( ThisEntryDate >= dateLimit ){
-        newData.forEach(function(p){
+        result.forEach(function(p){
           if(p.device === e.Device){
             p.qte++
           }
@@ -131,23 +139,42 @@ function getPastDays(days){
      }
 
   })
-    chart.data(newData);
-    chart.render();
+  return result;
+
+}
+
+function getGender(days){
+    var today = new Date(2014, 06, 31);
+    var dateLimit = new Date (2014, 06, 31-days)
+    menCount = 0;
+    womenCount = 0;
+    rawData.forEach(function(e){
+        var month = e.Date[0] -1,
+            day = e.Date.substr(2,2),
+            year = e.Date.substr(5,4);
+
+            var ThisEntryDate = new Date (year, month, day);
+            if ( ThisEntryDate >= dateLimit ){
+                if ( e.Gender === 'male'){
+                    menCount++
+                }else{
+                    womenCount++
+                }
+            }
+    })
+}
+
+function updateGenderCount(days){
+
+    getGender(days);
+    document.getElementById("menCount").innerHTML = menCount;
+    document.getElementById("womenCount").innerHTML = womenCount;
+    document.getElementById("totalCount").innerHTML = womenCount+menCount;
+
 }
 
 
-
-
-////////////////////////////////////////////////////////////////////////////
-//////
-
-
-///line chart
-
-
-
-/////////////////////date object one////////
-function getRaw(days){
+function getLinechartDataPoints(days){
     var result = [];
     var count = 0;
     var rows = 0;
@@ -155,7 +182,6 @@ function getRaw(days){
     var dateLowerLimit = new Date(2014, 6, 31-days);
     rawData.forEach(function(d, i){
 
-        // if (d.Date === '7/31/2014'){
         if (dateLowerLimit < new Date(d.Date+' '+d.Time) && new Date(d.Date+' '+d.Time) < today){
             rows++;
             if ( d.Activity === '1'){
@@ -182,14 +208,13 @@ function getRaw(days){
 
 
 
-function lineChart() { // <-1A
+function lineChart() {
     var _chart = {};
 
-    var _width = 600, _height = 300, // <-1B
+    var _width = 900, _height = 350,
             _margins = {top: 30, left: 30, right: 30, bottom: 30},
             _x, _y,
             _data = [],
-            _colors = d3.scale.category10(),
             _svg,
             _bodyG,
             _xAxis,
@@ -199,12 +224,13 @@ function lineChart() { // <-1A
             _ymax,
             _ymin;
 
-    _chart.render = function () { // <-2A
+    _chart.render = function () {
         if (!_svg) {
             _x = d3.time.scale().range([0, quadrantWidth()]).domain([new Date(_xmax.valueOf() - 24 * 60 * 60 * 1000), _xmax]);
             _y = d3.scale.linear().range([quadrantHeight(), 0]).domain([0,1]);
             _xAxis = d3.svg.axis().scale(_x).orient("bottom");
-            _svg = d3.select("body").append("svg") // <-2B
+            _svg = d3.select("div.lineChartContainer").append("svg")
+                    .attr("class", "lineChart")
                     .attr("height", _height)
                     .attr("width", _width);
 
@@ -267,7 +293,7 @@ function lineChart() { // <-1A
 
     }
 
-    function defineBodyClip(svg) { // <-2C
+    function defineBodyClip(svg) {
         var padding = 5;
 
         svg.append("defs")
@@ -280,13 +306,13 @@ function lineChart() { // <-1A
                 .attr("height", quadrantHeight());
     }
 
-    function renderBody(svg) { // <-2D
+    function renderBody(svg) {
         if (!_bodyG)
             _bodyG = svg.append("g")
                     .attr("class", "body")
                     .attr("transform", "translate("
                         + xStart() + ","
-                        + yEnd() + ")") // <-2E
+                        + yEnd() + ")")
                     .attr("clip-path", "url(#body-clip)");
 
         renderLines();
@@ -303,7 +329,7 @@ function lineChart() { // <-1A
                 .enter()
                 .append("path")
                 .style("stroke", function (d, i) {
-                    return _colors(i);
+                    return 'blue';
                 })
                 .attr("class", "line");
 
@@ -314,16 +340,16 @@ function lineChart() { // <-1A
 
         if (trendFlag === true){
         _bodyG.selectAll("path.trend")
-                    .data([trendL])
+                    .data([trendLineToBeDrawn])
                 .enter()
                 .append("path")
                 .style("stroke", function (d, i) {
-                    return _colors(10);
+                    return 'yellow';
                 })
                 .attr("class", "trend");
 
         _bodyG.selectAll("path.trend")
-                .data([trendL])
+                .data([trendLineToBeDrawn])
                 .transition()
                 .attr("d", function (d) { return _line(d); });
         }else{
@@ -380,7 +406,7 @@ function lineChart() { // <-1A
         return _chart;
     };
 
-    _chart.height = function (h) { // <-1C
+    _chart.height = function (h) {
         if (!arguments.length) return _height;
         _height = h;
         return _chart;
@@ -410,7 +436,7 @@ function lineChart() { // <-1A
         return _chart;
     };
 
-    _chart.setSeries = function (series) { // <-1D
+    _chart.setSeries = function (series) {
         var xmin = d3.min(series, function(d){return d.x;});
         var xmax = d3.max(series, function(d){return d.x;});
         var ymin = d3.min(series, function(d){return d.y;});
@@ -432,28 +458,25 @@ function lineChart() { // <-1A
         return _chart;
     };
 
-    return _chart; // <-1E
+    return _chart;
 }
 
-
-///////////////////pie chart
 
 function pieChart(){
         var _chart = {};
 
-        var _width = 200, _height = 200,
+        var _width = 210, _height = 200,
                 _data = [],
                 _colors = d3.scale.category20(),
                 _svg,
                 _bodyG,
                 _pieG,
                 _radius = 100,
-                _innerRadius = 80;
+                _innerRadius = 60;
 
         _chart.render = function () {
             if (!_svg) {
-              console.log('je suo la');
-                _svg = d3.select("body").append("svg")
+                _svg = d3.select("div.pieChartContainer").append("svg")
                         .attr("height", _height)
                         .attr("width", _width);
             }
@@ -470,7 +493,7 @@ function pieChart(){
         }
 
         function renderPie() {
-            var pie = d3.layout.pie() // <-A
+            var pie = d3.layout.pie()
                     .sort(function (d) {
                         return d.device;
                     })
@@ -497,7 +520,7 @@ function pieChart(){
 
         function renderSlices(pie, arc) {
             var slices = _pieG.selectAll("path.arc")
-                    .data(pie(_data)); // <-B
+                    .data(pie(_data));
 
             slices.enter()
                     .append("path")
@@ -508,7 +531,7 @@ function pieChart(){
 
             slices.transition()
                     .attrTween("d", function (d) {
-                        var currentArc = this.__current__; // <-C
+                        var currentArc = this.__current__;
 
                         if (!currentArc)
                             currentArc = {startAngle: 0,
@@ -517,7 +540,7 @@ function pieChart(){
                         var interpolate = d3.interpolate(
                                             currentArc, d);
 
-                        this.__current__ = interpolate(1);//<-D
+                        this.__current__ = interpolate(1);
 
                         return function (t) {
                             return arc(interpolate(t));
@@ -527,7 +550,7 @@ function pieChart(){
 
         function renderLabels(pie, arc) {
             var labels = _pieG.selectAll("text.label")
-                    .data(pie(_data)); // <-E
+                    .data(pie(_data));
 
             labels.enter()
                     .append("text")
@@ -536,7 +559,7 @@ function pieChart(){
             labels.transition()
                     .attr("transform", function (d) {
                         return "translate("
-                            + arc.centroid(d) + ")"; // <-F
+                            + arc.centroid(d) + ")";
                     })
                     .attr("dy", ".35em")
                     .attr("text-anchor", "middle")
@@ -588,12 +611,32 @@ function pieChart(){
 
 </script>
 
-<button onclick="getPastDays(1)">today</button>
-<button onclick="getPastDays(3)">3 days</button>
-<button onclick="getPastDays(7)">7 days</button>
-<button onclick="getPastDays(14)">14 days</button>
-<button onclick="trendLine(daysRange)">trend</button>
-<button onclick="meanLine(daysRange)">mean</button>
+<div>
+    <div class='dateRangeContainer'>
+        <button onclick="getPastDays(1)">today</button>
+        <button onclick="getPastDays(3)">3 days</button>
+        <button onclick="getPastDays(7)">7 days</button>
+        <button onclick="getPastDays(14)">14 days</button>
+    </div>
+    <div class='lineChartContainer'>
+    </div>
+
+</div>
+<div class='extraLineContainer'>
+    <button onclick="trendLine(daysRange)">trend</button>
+    <button onclick="meanLine(daysRange)">mean</button>
+</div>
+
+<div class="pieChartContainer">
+    <p>Devices</p>
+</div>
+
+<div class="genderCount">
+<h4>Segments</h4>
+<p>All: <span id='totalCount'></span></p>
+<p>Men: <span id='menCount'></span></p>
+<p>Women: <span id='womenCount'></span></p>
+</div>
 
 
 
