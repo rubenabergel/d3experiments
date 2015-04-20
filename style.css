@@ -9,6 +9,7 @@ button {
     border: 1px solid #dedede;
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
+    padding: 4px 15px;
 
     font-size: 12px;
     line-height: 130%;
@@ -16,6 +17,10 @@ button {
     font-weight: bold;
     color: #565656;
     cursor: pointer;
+}
+
+.deviceTitle{
+  text-align: center;
 }
 
 
@@ -56,24 +61,27 @@ button {
 }
 
 .dateRangeContainer{
-    width: 900px;
+    width: 1200px;
     text-align: right;
 }
 
 .extraLineContainer{
-    width: 900px;
+    width: 1200px;
     text-align: right;
 }
 
 .pieChartContainer{
-  margin-left: 600px;
+  margin-left: 800px;
   display: inline-block;
   text-align: right;
-  margin-top: 35px;
 }
 
 .genderCount{
     float: left;
     display: inline-block;
+}
+
+.extraLineContainer button{
+   background-color: rgb(140, 213, 140);
 }
 
