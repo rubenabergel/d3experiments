@@ -20,13 +20,13 @@
             menCount = 0,
             womenCount = 0;
 
+        // initialize a pieData object to start counting
         var pieData = PieDataToZero();
 
         //Load data and init chart at today
         d3.csv('data.csv', function(d){
             rawData = d;
             data = getLinechartDataPoints(0);
-            console.log(data);
             lineChart = lineChart()
             lineChart.setSeries(data);
             lineChart.render();
