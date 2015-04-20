@@ -10,70 +10,62 @@
 
 </head>
 <body>
+    <script type="text/javascript">
+        var trendFlag = false,
+            meanFlag = false,
+            daysRange = 1,
+            rawData,
+            trendLineToBeDrawn,
+            meanLineToBeDrawn,
+            menCount = 0,
+            womenCount = 0;
 
-  <div class="graph">
-  </div>
+        var pieData = PieDataToZero();
 
-<script type="text/javascript">
-var trendFlag = false,
-    meanFlag = false,
-    daysRange = 1,
-    rawData,
-    trendLineToBeDrawn,
-    meanLineToBeDrawn,
-    menCount = 0,
-    womenCount = 0;
+        //Load data and init chart at today
+        d3.csv('data.csv', function(d){
+            rawData = d;
+            data = getLinechartDataPoints(0);
+            console.log(data);
+            lineChart = lineChart()
+            lineChart.setSeries(data);
+            lineChart.render();
 
-var pieData = PieDataToZero();
+            chart = pieChart()
+            .data(PieSortData(1));
+            chart.render();
 
-//Load data and init chart at today
-d3.csv('data.csv', function(d){
-    rawData = d;
-    data = getLinechartDataPoints(0);
-    console.log(data);
-    lineChart = lineChart()
-    lineChart.setSeries(data);
-    lineChart.render();
+            updateGenderCount(1);
 
-    chart = pieChart()
-    .data(PieSortData(1));
-    chart.render();
+        });
+    </script>
 
-    updateGenderCount(1);
+    <div>
+        <div class='dateRangeContainer'>
+            <button onclick="getPastDays(1)">today</button>
+            <button onclick="getPastDays(3)">3 days</button>
+            <button onclick="getPastDays(7)">7 days</button>
+            <button onclick="getPastDays(14)">14 days</button>
+        </div>
+        <h4 style="margin:0">Activity</h4>
+        <div class='lineChartContainer'>
+        </div>
 
-});
-</script>
-
-<div>
-    <div class='dateRangeContainer'>
-        <button onclick="getPastDays(1)">today</button>
-        <button onclick="getPastDays(3)">3 days</button>
-        <button onclick="getPastDays(7)">7 days</button>
-        <button onclick="getPastDays(14)">14 days</button>
     </div>
-    <h4 style="margin:0">Activity</h4>
-    <div class='lineChartContainer'>
+    <div class='extraLineContainer'>
+        <button onclick="trendLine(daysRange)">trend</button>
+        <button onclick="meanLine(daysRange)">mean</button>
     </div>
 
-</div>
-<div class='extraLineContainer'>
-    <button onclick="trendLine(daysRange)">trend</button>
-    <button onclick="meanLine(daysRange)">mean</button>
-</div>
+    <div class="pieChartContainer">
+        <h4 class="deviceTitle">Devices</h4>
+    </div>
 
-<div class="pieChartContainer">
-
-    <h4 class="deviceTitle">Devices</h4>
-</div>
-
-<div class="genderCount">
-<h4>Segments</h4>
-<p><b>All:</b> <span id='totalCount'></span></p>
-<p><b>Men:</b> <span id='menCount'></span></p>
-<p><b>Women:</b> <span id='womenCount'></span></p>
-</div>
-
-
-
+    <div class="genderCount">
+        <h4>Segments</h4>
+        <p><b>All:</b> <span id='totalCount'></span></p>
+        <p><b>Men:</b> <span id='menCount'></span></p>
+        <p><b>Women:</b> <span id='womenCount'></span></p>
+    </div>
 </body>
 </html>
